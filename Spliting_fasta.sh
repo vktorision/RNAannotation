@@ -3,7 +3,8 @@
 FILE=$1
 mkdir "temporary_split"
 mkdir "temporary_script"
-	awk 'BEGIN {n_seq=0;} /^>/ {if(n_seq%3==0){file=sprintf("temporary_split/myseq%d.fa",n_seq);} print >> file; n_seq++; next;} { print >> file; }' $FILE
+mkdir "output"
+	awk 'BEGIN {n_seq=0;} /^>/ {if(n_seq%10==0){file=sprintf("temporary_split/myseq%d.fa",n_seq);} print >> file; n_seq++; next;} { print >> file; }' $FILE
 FILES="temporary_split/*"
 for f in $FILES
 do
@@ -13,10 +14,10 @@ do
   echo "#!/bin/bash -l" >> temporary_script/$name
   echo "#SBATCH -A b2011098" >> temporary_script/$name
   echo "#SBATCH -p core" >> temporary_script/$name
-  echo "#SBATCH -n 1" >> temporary_script/$name
-  echo "#SBATCH -t 0:00:10" >> temporary_script/$name
+  echo "#SBATCH -n 4" >> temporary_script/$name
+  echo "#SBATCH -t 00:50:00" >> temporary_script/$name
   echo "#SBATCH -J $name" >> temporary_script/$name
-  echo "../interproscan.sh -t n -dp -appl Coils, Gene3D, PfamA, PRINTS, ProDom, SMART, SUPERFAMILY, TIGRFAM -i ../$f -b output/$name" >> temporary_script/$name
+  echo "./interproscan.sh -t n -dp -appl Coils, Gene3D, PfamA, PRINTS, ProDom, SMART, SUPERFAMILY, TIGRFAM -i $f -b output/$name" >> temporary_script/$name
   sbatch temporary_script/$name
   echo "Done"
 done
